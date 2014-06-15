@@ -1,8 +1,14 @@
 irfc_bot
 ========
-
 A web scraper and irc bot to relay the BBC football live text commentary written in node.js
 
+
+This small project is actually a result of another one ([bbc-lc](https://github.com/cramsay/bbc-lc)).
+The goal was to create a ncurses interface to the BBC commentary.
+However, I suck at UI design... I realised I was just trying to replicate the configuration I had for irssi 
+(my irc client of choice). IRC bots are _cool_ and I could use some better OOP skills with javascript for my work.
+So I turned it in to an IRC bot written in Node.js :)  
+If you want to see it in action (and there is football happening) connect to "cramsay.co.uk" and join the "#fitba" channel.
 
 ## Usage
 Any IRC user can type "!games" to have the bot return details of all of the games today.
