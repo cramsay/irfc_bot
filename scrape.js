@@ -106,6 +106,7 @@ function maintainGamesList(){
 		    			console.log('Adding new game : '+game_id);
 		    			ircbot.bot.say(ircbot.config.channels[0],'Adding new game : '+game_id);
 		    			games[game_id]= new Game(game_id,colours[games_len++%colours.length]);
+		    			games[game_id].start_updates();
 		    		}
 		    	}
 		    });
@@ -114,14 +115,11 @@ function maintainGamesList(){
 		    //do some easy garbage collection
 		    if(!hits&&games_len){
 		    	console.log('cleaning games...');
-		    	for(var i in games)
+		    	for(var i in games){
 		    		games[i].stop_updates();
-		    	games=[];
+		    		games[i]=null;
+		    	}
 		    }
-
-	    	//Start all found games
-	    	for (var i in games)
-	    		games[i].start_updates();
 	});
 }
 
