@@ -167,13 +167,17 @@ function gameListDetails(){
 		    });
 
 	    	//Print out each game lists
+	    	var hasGames=false;
 	    	for (t in games_list)
 	    	if(games_list[t].length){
+	    		hasGames=true;
 	    		ircbot.bot.say(ircbot.config.channels[0],' ');
     			ircbot.bot.say(ircbot.config.channels[0],irc.colors.wrap('dark_green',t+':'));
 	    		for(var i=0;g=games_list[t][i++];)
 	    			ircbot.bot.say(ircbot.config.channels[0],g);
 	    	}
+	    	if(!hasGames)
+	    		ircbot.bot.say(ircbot.config.channels[0],irc.colors.wrap('dark_green','Nothing happening today :('));	
 	    	ircbot.bot.say(ircbot.config.channels[0],' ');
 	});
 }
