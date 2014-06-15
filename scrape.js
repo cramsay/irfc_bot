@@ -42,16 +42,22 @@ function Game(game_id, colour){
 	this.saidLines = 0;
 }
 
+//Start periodic update of game text
 Game.prototype.start_updates = function(){
-	this.timer=setInterval(createDelegate(this,this.handle_game),this.interval);
-	this.handle_game();
+	if(!this.timer){
+		this.timer=setInterval(createDelegate(this,this.handle_game),this.interval);
+		this.handle_game();
+	}
 };
 
+//Stop periodic update of game text
 Game.prototype.stop_updates = function(){
 	clearInterval(this.timer);
 };
 
+//Grab, process and say new game commentary
 Game.prototype.handle_game = function(){
+	//Load game events page
 	request(url_events+this.id, createDelegate(this,function(err, resp, body) {
 		var norm_colour=this.colour;
 		lines=[];
@@ -59,12 +65,14 @@ Game.prototype.handle_game = function(){
 	        throw err;
 	    $ = cheerio.load(body);
 
+	    //Add each event to our lines array
 	    $('.live-text').each(function(i,e){
 	    	$(e).children('span').each(function(i,e){
 				lines.push(irc.colors.wrap('light_blue', $(this).text().trim(),norm_colour)+': '+$(this).next('p').text().trim()+'\n');	
 	    	});
 	    });
 
+	    //Print out any new lines
 		for(var i=lines.length-1-this.saidLines;i>=0;i--){
 	    	console.log(lines[i])
 	    	ircbot.bot.say(ircbot.config.channels[0],lines[i]);
@@ -74,10 +82,11 @@ Game.prototype.handle_game = function(){
 	}));
 };
 
-var colours=['gray','dark_red','dark_green','dark_blue'];
-var games={};//Use this as an associative array (actually an object)
-var games_len=0;
+var colours=['gray','dark_red','dark_green','dark_blue']; //List of possible game colours
+var games={};//Use this as an associative array or live games (actually an object)
+var games_len=0;//Needed because games obj doesn't have .length property
 function maintainGamesList(){
+	//Load games page
 	request(url_games,function(err, resp, body) {
 			
 		    if (err)
@@ -115,31 +124,42 @@ function maintainGamesList(){
 	    		games[i].start_updates();
 	});
 }
+
+//Run game list maintenance every 5 minutes (and once, straight away)
 setInterval(maintainGamesList,300000);
 maintainGamesList();
 
+//Print out details of all todays games
+//This is what is called when a client types "!games"
 function gameListDetails(){
+	//Load games page
 	request(url_games,function(err, resp, body) {
 			
 		    if (err)
 		        throw err;
 		    $ = cheerio.load(body);
 
+		    //Set up 3 lists for different game types
 		    var games_list = {live:[],past:[],future:[]};
-		    //Find games
+
+		    //Find all games
 		    $('tr').each(function(i,e){
 		    	var id=$(e).attr('id');
 		    	if(id && (id.indexOf('match-row-')==0)){
 
 		    		var game_id = $(e).attr('id').replace('match-row-','');
+		    		
+	    			//Find any live games and display using correct colour (if possible)
 		    		if($(e).hasClass('live'))
 		    			games_list.live.push(
 		    				irc.colors.wrap(games[game_id]?games[game_id].colour:'reset',$(e).find('.team-home').text().trim()+' vs '+$(e).find('.team-away').text().trim())+' : '+irc.colors.wrap('light_blue',$(e).find('.score').text().trim())
 		    			);
+		    		//Find any finished games
 		    		else if($(e).hasClass('report'))
 		    			games_list.past.push(
 		    				$(e).find('.team-home').text().trim()+' vs '+$(e).find('.team-away').text().trim()+' : '+irc.colors.wrap('light_blue',$(e).find('.score').text().trim())
 		    			);
+		    		//Find any games yet to start
 		    		else if($(e).hasClass('fixture'))
 		    			games_list.future.push(
 		    				$(e).find('.team-home').text().trim()+' vs '+$(e).find('.team-away').text().trim()+' : '+irc.colors.wrap('light_blue',$(e).find('.elapsed-time').text().trim().replace(/ +|\n/g,' '))
@@ -147,23 +167,12 @@ function gameListDetails(){
 		    	}
 		    });
 
-	    	//Print out game lists
-	    	if(games_list.live.length){
+	    	//Print out each game lists
+	    	for (t in games_list)
+	    	if(games_list[t].length){
 	    		ircbot.bot.say(ircbot.config.channels[0],' ');
-    			ircbot.bot.say(ircbot.config.channels[0],irc.colors.wrap('dark_green','Live games:'));
-	    		for(var i=0;g=games_list.live[i++];)
-	    			ircbot.bot.say(ircbot.config.channels[0],g);
-	    	}
-	    	if(games_list.past.length){
-	    		ircbot.bot.say(ircbot.config.channels[0],' ');
-    			ircbot.bot.say(ircbot.config.channels[0],irc.colors.wrap('dark_green','Finished games:'));
-	    		for(var i=0;g=games_list.past[i++];)
-	    			ircbot.bot.say(ircbot.config.channels[0],g);
-	    	}
-	    	if(games_list.future.length){
-	    		ircbot.bot.say(ircbot.config.channels[0],' ');
-    			ircbot.bot.say(ircbot.config.channels[0],irc.colors.wrap('dark_green','Upcoming games:'));
-	    		for(var i=0;g=games_list.future[i++];)
+    			ircbot.bot.say(ircbot.config.channels[0],irc.colors.wrap('dark_green',t+':'));
+	    		for(var i=0;g=games_list[t][i++];)
 	    			ircbot.bot.say(ircbot.config.channels[0],g);
 	    	}
 	    	ircbot.bot.say(ircbot.config.channels[0],' ');
