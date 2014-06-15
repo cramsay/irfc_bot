@@ -118,6 +118,7 @@ function maintainGamesList(){
 		    	for(var i in games){
 		    		games[i].stop_updates();
 		    		games[i]=null;
+		    		games_len=0;
 		    	}
 		    }
 	});
