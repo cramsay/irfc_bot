@@ -4,7 +4,8 @@ var cheerio = require('cheerio');
 var irc = require("irc");
 
 //URL "constants"
-var url_games = 'http://www.bbc.co.uk/sport/shared/football/live-scores/matches/119001880/today';
+var comp_id = '118996176';
+var url_games = 'http://www.bbc.co.uk/sport/shared/football/live-scores/matches/'+comp_id+'/today';
 var url_events = 'http://polling.bbc.co.uk/sport/shared/football/oppm/live-text-commentary/';
 
 //Helper function to preserve "this" reference when using
@@ -52,7 +53,8 @@ Game.prototype.start_updates = function(){
 
 //Stop periodic update of game text
 Game.prototype.stop_updates = function(){
-	clearInterval(this.timer);
+	if(this.timer)
+		clearInterval(this.timer);
 };
 
 //Grab, process and say new game commentary
@@ -83,10 +85,11 @@ Game.prototype.handle_game = function(){
 };
 
 var colours=['gray','dark_red','dark_green','dark_blue']; //List of possible game colours
-var games={};//Use this as an associative array or live games (actually an object)
-var games_len=0;//Needed because games obj doesn't have .length property
+var games={};//Use this as an associative array of live games
+var games_len=0;//Needed because games obj doesn't have a built-in ".length" property
 function maintainGamesList(){
-	//Load games page
+	
+	//Load games list page
 	request(url_games,function(err, resp, body) {
 			
 		    if (err)
