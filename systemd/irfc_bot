@@ -1,0 +1,5 @@
+#!/bin/bash
+#/usr/bin/irfc_bot
+
+cd ~/irfc_bot/src/
+node irfc_bot.js >> /tmp/irfc_bot.log

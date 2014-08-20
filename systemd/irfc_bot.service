@@ -1,0 +1,15 @@
+#/usr/lib/systemd/system/irfc_bot.service
+
+[Unit]
+Description=football commentary irc bot
+After=network.target
+
+[Service]
+User=craig
+Group=users
+ExecStart=/usr/bin/irfc_bot
+StandardOutput=tty
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
