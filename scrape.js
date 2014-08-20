@@ -63,8 +63,10 @@ Game.prototype.handle_game = function(){
 	request(url_events+this.id, createDelegate(this,function(err, resp, body) {
 		var norm_colour=this.colour;
 		lines=[];
-	    if (err)
-	        throw err;
+	    if (err){
+	        console.log(err);
+		return;
+	    }
 	    $ = cheerio.load(body);
 
 	    //Add each event to our lines array
@@ -92,8 +94,10 @@ function maintainGamesList(){
 	//Load games list page
 	request(url_games,function(err, resp, body) {
 			
-		    if (err)
-		        throw err;
+	    if (err){
+	        console.log(err);
+		return;
+	    }
 		    $ = cheerio.load(body);
 
 		    //Find all live games
@@ -137,8 +141,10 @@ function gameListDetails(){
 	//Load games page
 	request(url_games,function(err, resp, body) {
 			
-		    if (err)
-		        throw err;
+		    if (err){
+			    console.log(err);
+			    return;
+		    }
 		    $ = cheerio.load(body);
 
 		    //Set up 3 lists for different game types
